@@ -1,0 +1,46 @@
+Revision History for Dist-Zilla-PluginBundle-GopherRepellent
+============================================================
+
+0.003011
+--------
+
+8a558b8 Use latest Repository plugin and add Bugtracker plugin
+
+b41b928 Change POD subtly to be slightly more readable
+
+46d90a9 Improve ini-related POD for Weaver bundle
+
+412ba4f Add example weaver.ini
+
+c28eeb1 Reorder sections to match documentation
+
+52f65b0 Explicitly list MetaNoIndex configuration in POD
+
+ce6221a Add Pod::Coverage hint for 'configure'
+
+ab662cb Add a few comments about ideas from Apocalypse
+
+2d9ff83 Add [untested] 'releaser' attribute (defaulted to UploadToCPAN)
+
+b28cf36 Use config_slice method to make code more clear/consistent/simple
+
+08570d3 Comment on plugins (and versions) to consider for the future
+
+v0.3 2010-11-15
+---------------
+
+983478c Improve META: describe provided packages and directories to ignore
+
+53f09a0 "use" required modules to ensure availability
+
+08da34d Merge CAVEATS into RATIONALE and expound on the intention and possible audience
+
+1a18134 Add RATIONALE and SEE ALSO sections to POD
+
+f84632f Add example dist.ini
+
+bd474ee Add README file outside of distribution to make github happy
+
+===================================
+End of changes in the last 365 days
+===================================
