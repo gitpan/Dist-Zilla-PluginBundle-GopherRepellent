@@ -28,6 +28,7 @@ my %WriteMakefileArgs = (
     'Dist::Zilla::Plugin::CompileTests' => '1.100740',
     'Dist::Zilla::Plugin::Git::DescribeVersion' => '0.006',
     'Dist::Zilla::Plugin::GitFmtChanges' => '0.003',
+    'Dist::Zilla::Plugin::GithubMeta' => '0.10',
     'Dist::Zilla::Plugin::MetaNoIndex' => '1.101130',
     'Dist::Zilla::Plugin::MetaProvides::Package' => '1.11044404',
     'Dist::Zilla::Plugin::MinimumPerl' => '0.02',
@@ -42,9 +43,9 @@ my %WriteMakefileArgs = (
     'Pod::Elemental::Transformer::List' => '0',
     'Pod::Weaver::Config::Assembler' => '0',
     'Pod::Weaver::PluginBundle::Default' => '0',
-    'Pod::Weaver::Section::Support' => '1.001'
+    'Pod::Weaver::Section::Support' => '1.000'
   },
-  'VERSION' => '0.003011',
+  'VERSION' => '0.004001',
   'test' => {
     'TESTS' => 't/*.t'
   }

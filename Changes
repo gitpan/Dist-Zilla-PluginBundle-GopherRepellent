@@ -1,8 +1,15 @@
 Revision History for Dist-Zilla-PluginBundle-GopherRepellent
 ============================================================
 
-0.003011
+0.004001
 --------
+
+7fc2d4d Let GithubMeta plugin override Repository (if on github)
+
+v0.4 2010-11-17
+---------------
+
+fb193f6 Feature-test PW::Section::Support instead of requiring a version that doesn't exist
 
 8a558b8 Use latest Repository plugin and add Bugtracker plugin
 
