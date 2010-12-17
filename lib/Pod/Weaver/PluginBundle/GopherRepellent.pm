@@ -1,15 +1,22 @@
 package Pod::Weaver::PluginBundle::GopherRepellent;
 BEGIN {
-  $Pod::Weaver::PluginBundle::GopherRepellent::VERSION = '0.004001';
+  $Pod::Weaver::PluginBundle::GopherRepellent::VERSION = '0.008004';
+}
+BEGIN {
+  $Pod::Weaver::PluginBundle::GopherRepellent::AUTHORITY = 'cpan:RWSTAUNER';
 }
 # ABSTRACT: keep those pesky gophers out of your POD!
 
 use strict;
 use warnings;
 
+use Pod::Weaver 3.101632 ();
 use Pod::Weaver::PluginBundle::Default ();
+use Pod::Weaver::Plugin::StopWords 1.000001 ();
+use Pod::Weaver::Plugin::Transformer ();
 #use Pod::Weaver::Plugin::WikiDoc ();
-use Pod::Weaver::Section::Support 1.000 (); # pull request not on CPAN
+use Pod::Weaver::Section::Support 1.001 ();
+use Pod::Elemental 0.102360 ();
 use Pod::Elemental::Transformer::List ();
 
 use Pod::Weaver::Config::Assembler;
@@ -24,6 +31,7 @@ sub mvp_bundle_config {
   push @plugins, (
     #[ "$NAME/WikiDoc",     _exp('-WikiDoc'), {} ],
     [ "$NAME/CorePrep",    _exp('@CorePrep'), {} ],
+
     [ "$NAME/Name",        _exp('Name'),      {} ],
     [ "$NAME/Version",     _exp('Version'),   {} ],
 
@@ -48,21 +56,18 @@ sub mvp_bundle_config {
     [ "$NAME/Leftovers", _exp('Leftovers'), {} ],
     [ "$NAME/postlude",  _exp('Region'),    { region_name => 'postlude' } ],
 
+	# TODO: consider SeeAlso if it ever allows comments with the links
+
 	# include Support section with various cpan links and github repo
     [ "$NAME/Support",   _exp('Support'),
-		{
-			# these attributes are waiting in a pull request
-			eval { Pod::Weaver::Section::Support->can('repository_content') }
-			? (
-				repository_content => '',
-				repository_link => 'both'
-			) : ()
-		}
+		{ repository_content => '', repository_link => 'both' }
 	],
 
     [ "$NAME/Authors",   _exp('Authors'),   {} ],
     [ "$NAME/Legal",     _exp('Legal'),     {} ],
     [ "$NAME/List",      _exp('-Transformer'), { 'transformer' => 'List' } ],
+
+	[ "$NAME/StopWords", _exp('-StopWords'), {} ],
   );
 
   return @plugins;
@@ -74,13 +79,15 @@ sub mvp_bundle_config {
 __END__
 =pod
 
+=for :stopwords Randy Stauner PluginBundle
+
 =head1 NAME
 
 Pod::Weaver::PluginBundle::GopherRepellent - keep those pesky gophers out of your POD!
 
 =head1 VERSION
 
-version 0.004001
+version 0.008004
 
 =head1 SYNOPSIS
 
@@ -88,13 +95,13 @@ version 0.004001
 
 	[@GopherRepellent]
 
-or with a dist.ini like so:
+or with a F<dist.ini> like so:
 
 	# dist.ini
 
 	[@GopherRepellent]
 
-you don't need a weaver.ini at all.
+you don't need a F<weaver.ini> at all.
 
 =head1 DESCRIPTION
 
@@ -147,8 +154,10 @@ It is roughly equivalent to:
 	[Authors]                 ; [@Default]
 	[Legal]                   ; [@Default]
 
-	[-Transformer]            ; =for :list
+	[-Transformer]            ; enable =for :list
 	transformer = List
+
+	[-StopWords]              ; generate some stopwords and gather them together
 
 =for Pod::Coverage mvp_bundle_config
 

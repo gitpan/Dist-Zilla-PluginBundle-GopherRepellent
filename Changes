@@ -1,8 +1,96 @@
 Revision History for Dist-Zilla-PluginBundle-GopherRepellent
 ============================================================
 
-0.004001
+0.008004
 --------
+
+48877c9 Explicitly require base modules so we can specify the required version
+
+89e42f1 Remove commented idea that I don't care to remember
+
+d0ed179 Remove unnecessary testing for Section::Support features now that the correct version 'use'd
+
+92f9761 Use ReportVersions::Tiny to help with test reports
+
+v0.8 2010-12-16
+---------------
+
+e6b2fb0 Use DualBuilders to provide both Module::Build and EUMM (but prefer 'build')
+
+e33b24e Comment InstallRelease Plugin to consider for later
+
+40b859b Add comment about possibly using Pod::Spelling::CommonMistakes in the future
+
+4a3f3c1 Fix required version typo for DZ Plugin PodLinkTests
+
+e04c4b8 Make Stash::PodWeaver a prerequisite
+
+ba65cb2 Add TODO Comment to remember Section::SeeAlso for the future
+
+e76afef Explicitly 'use' StopWords and Transformer plugin
+
+141b99c Update version requirement for Section::Support to 1.001
+
+57ec308 Add Pod::Coverage hints for log and log_fatal
+
+64998bd Add attributes (and their default values) to the Synopsis POD Section
+
+v0.7 2010-12-10
+---------------
+
+55f507f Make PodLinkTests configurable and not a requirement
+
+932e278 Define our own log() and log_fatal() methods unless the package already has them
+
+1374f24 Add TODO comment about determining the dzil phase and announcing the Releaser
+
+95d75bb Add [commented out] MetaData::BuiltWith plugin because I'd like to use it but it's currently broken
+
+3031a2e Add some comments about MetaNoIndex plugin
+
+1c1690e Document addition of Authority plugin in POD
+
+v0.6 2010-12-09
+---------------
+
+4b3c4c6 Use new PodLinkTests plugin
+
+6acc2bd Set minimum Dist::Zilla version to latest and greatest
+
+71125ba Add Authority plugin
+
+16afedb Expand MetaProvides::Package specification for consistency
+
+640da0a Link to Lucas Arts from README
+
+4f4fdf8 Link to external modules in README
+
+1efa95d Change unnecessary heading to italics
+
+b97e431 Restyle README POD slightly
+
+dd23b51 Explicitly 'use' plugins previously not specified
+
+13e7657 Add stopwords to POD
+
+6bbc9dc Fix typo in POD
+
+f381636 Add PodSpellingTests to 'Roughly Equivalent' POD
+
+v0.5 2010-11-24
+---------------
+
+7541bd8 Use PodSpellingTests to generate a pod spell check in xt/
+
+c2e95fa Add the StopWords plugin to generate and gather stopwords at the top
+
+975bf97 Clarify note about list transformer
+
+9d8786a Link to Dist::Zilla and Module::CPANTS::Analyse when referring to dz and kwalitee
+
+ef60458 Wrap (ini) file names with F<>
+
+e447151 Fix broken link: point to DZ::Role::PluginBundle::Easy
 
 7fc2d4d Let GithubMeta plugin override Repository (if on github)
 

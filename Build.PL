@@ -2,29 +2,32 @@
 use strict;
 use warnings;
 
-BEGIN { require 5.006; }
-
-use ExtUtils::MakeMaker 6.31;
+use Module::Build 0.3601;
 
 
-
-my %WriteMakefileArgs = (
-  'ABSTRACT' => 'keep those pesky gophers out of your dists!',
-  'AUTHOR' => 'Randy Stauner <rwstauner@cpan.org>',
-  'BUILD_REQUIRES' => {
+my %module_build_args = (
+  'build_requires' => {
     'File::Find' => '0',
     'File::Temp' => '0',
-    'ExtUtils::MakeMaker' => '6.31',
+    'Module::Build' => '0.3601',
     'Test::More' => '0.96'
   },
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.31'
+  'configure_requires' => {
+    'Module::Build' => '0.3601'
   },
-  'DISTNAME' => 'Dist-Zilla-PluginBundle-GopherRepellent',
-  'EXE_FILES' => [],
-  'LICENSE' => 'perl',
-  'NAME' => 'Dist::Zilla::PluginBundle::GopherRepellent',
-  'PREREQ_PM' => {
+  'dist_abstract' => 'keep those pesky gophers out of your dists!',
+  'dist_author' => [
+    'Randy Stauner <rwstauner@cpan.org>'
+  ],
+  'dist_name' => 'Dist-Zilla-PluginBundle-GopherRepellent',
+  'dist_version' => '0.008004',
+  'license' => 'perl',
+  'module_name' => 'Dist::Zilla::PluginBundle::GopherRepellent',
+  'recommends' => {
+    'Dist::Zilla::Plugin::PodLinkTests' => '1.003'
+  },
+  'recursive_test_files' => 1,
+  'requires' => {
     'Dist::Zilla' => '4.102345',
     'Dist::Zilla::Plugin::Authority' => '1.001',
     'Dist::Zilla::Plugin::Bugtracker' => '0',
@@ -59,32 +62,13 @@ my %WriteMakefileArgs = (
     'Pod::Weaver::Plugin::StopWords' => '1.000001',
     'Pod::Weaver::Plugin::Transformer' => '0',
     'Pod::Weaver::PluginBundle::Default' => '0',
-    'Pod::Weaver::Section::Support' => '1.001'
+    'Pod::Weaver::Section::Support' => '1.001',
+    'perl' => '5.006'
   },
-  'VERSION' => '0.008004',
-  'test' => {
-    'TESTS' => 't/*.t'
-  }
+  'script_files' => []
 );
 
 
-unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
-  my $br = delete $WriteMakefileArgs{BUILD_REQUIRES};
-  my $pp = $WriteMakefileArgs{PREREQ_PM};
-  for my $mod ( keys %$br ) {
-    if ( exists $pp->{$mod} ) {
-      $pp->{$mod} = $br->{$mod} if $br->{$mod} > $pp->{$mod};
-    }
-    else {
-      $pp->{$mod} = $br->{$mod};
-    }
-  }
-}
+my $build = Module::Build->new(%module_build_args);
 
-delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
-  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
-
-WriteMakefile(%WriteMakefileArgs);
-
-
-
+$build->create_build_script;

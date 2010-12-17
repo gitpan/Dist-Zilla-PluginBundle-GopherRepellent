@@ -1,6 +1,9 @@
 package Dist::Zilla::PluginBundle::GopherRepellent;
 BEGIN {
-  $Dist::Zilla::PluginBundle::GopherRepellent::VERSION = '0.004001';
+  $Dist::Zilla::PluginBundle::GopherRepellent::VERSION = '0.008004';
+}
+BEGIN {
+  $Dist::Zilla::PluginBundle::GopherRepellent::AUTHORITY = 'cpan:RWSTAUNER';
 }
 # ABSTRACT: keep those pesky gophers out of your dists!
 
@@ -8,21 +11,32 @@ use strict;
 use warnings;
 use Moose;
 use Moose::Autobox;
-use Dist::Zilla 2.100922; # TestRelease
+use Dist::Zilla 4.102345;
 with 'Dist::Zilla::Role::PluginBundle::Easy';
 
 use Dist::Zilla::PluginBundle::Basic (); # use most of the plugins included
+use Dist::Zilla::Plugin::Authority 1.001 ();
+use Dist::Zilla::Plugin::Bugtracker ();
 #use Dist::Zilla::Plugin::CheckExtraTests ();
 use Dist::Zilla::Plugin::CompileTests 1.100740 ();
-use Dist::Zilla::Plugin::GithubMeta 0.10 ();
+use Dist::Zilla::Plugin::DualBuilders 1.001 (); # only runs tests once
 use Dist::Zilla::Plugin::Git::DescribeVersion 0.006 ();
 use Dist::Zilla::Plugin::GitFmtChanges 0.003 ();
+use Dist::Zilla::Plugin::GithubMeta 0.10 ();
+use Dist::Zilla::Plugin::KwaliteeTests ();
+#use Dist::Zilla::Plugin::MetaData::BuiltWith (); # FIXME: see comment below
 use Dist::Zilla::Plugin::MetaNoIndex 1.101130 ();
 use Dist::Zilla::Plugin::MetaProvides::Package 1.11044404 ();
 use Dist::Zilla::Plugin::MinimumPerl 0.02 ();
+use Dist::Zilla::Plugin::MinimumVersionTests ();
+use Dist::Zilla::Plugin::PkgVersion ();
+use Dist::Zilla::Plugin::PodCoverageTests ();
+use Dist::Zilla::Plugin::PodSpellingTests ();
+use Dist::Zilla::Plugin::PodSyntaxTests ();
 use Dist::Zilla::Plugin::PodWeaver ();
 use Dist::Zilla::Plugin::PortabilityTests ();
 use Dist::Zilla::Plugin::Repository 0.16 (); # deprecates github_http
+use Dist::Zilla::Plugin::ReportVersions::Tiny 1.01 ();
 use Dist::Zilla::Plugin::TaskWeaver 0.101620 ();
 use Pod::Weaver::PluginBundle::GopherRepellent ();
 
@@ -55,6 +69,17 @@ has is_task => (
 	default => sub { $_[0]->payload->{is_task} }
 );
 
+has pod_link_tests => (
+	is      => 'ro',
+	isa     => 'Bool',
+	lazy    => 1,
+	default => sub {
+		exists $_[0]->payload->{pod_link_tests}
+		     ? $_[0]->payload->{pod_link_tests}
+		     : 1
+	}
+);
+
 has releaser => (
 	is      => 'ro',
 	isa     => 'Str',
@@ -79,6 +104,19 @@ has weaver_config => (
 sub configure {
 	my ($self) = @_;
 
+	# optional... it was difficult to install these
+	my $pod_link_tests = $self->pod_link_tests &&
+		eval 'require Dist::Zilla::Plugin::PodLinkTests';
+
+	if( $pod_link_tests ){
+		$pod_link_tests = ['PodLinkTests'];
+	}
+	else {
+		$pod_link_tests = [];
+		$self->log('PodLinkTests disabled -- unable to load')
+			if $self->pod_link_tests;
+	}
+
 	$self->log_fatal("you must not specify both weaver_config and is_task")
 		if $self->is_task and $self->weaver_config ne $NAME;
 
@@ -95,6 +133,7 @@ sub configure {
 		),
 
 	# munge files
+		[ 'Authority' => { do_metadata => 1 }],
 		'PkgVersion',
 		# 'Prepender' 1.100960
 		( $self->is_task
@@ -126,14 +165,20 @@ sub configure {
 			? [ 'AutoPrereqs' => $self->config_slice({ skip_prereqs => 'skip' }) ]
 			: ()
 		),
+#		[ 'MetaData::BuiltWith' => { show_uname => 1 } ], # currently DZ::Util::EmulatePhase causes problems
 		[
 			MetaNoIndex => {
-				directory => [qw/corpus examples inc share t xt/],
-#				'namespace' => [qw/Local/],
-#				'package' => [qw/DB/]
+				# could use grep { -d $_ } but that will miss any generated files
+				directory => [qw(corpus examples inc share t xt)],
+#				'namespace' => [qw(Local t::lib)],
+#				'package' => [qw(DB)]
 			}
 		],
-		['MetaProvides::Package' => { meta_noindex => 1 } ], # AFTER MetaNoIndex
+		[ 	# AFTER MetaNoIndex
+			'MetaProvides::Package' => {
+				meta_noindex => 1
+			}
+		],
 
 		qw(
 			MinimumPerl
@@ -141,7 +186,6 @@ sub configure {
 			MetaYAML
 			MetaJSON
 		),
-		# 'Authority' 0.01
 
 		[
 			Prereqs => 'TestMoreWithSubtests' => {
@@ -157,26 +201,30 @@ sub configure {
 			ExecDir
 			ShareDir
 			MakeMaker
+			ModuleBuild
+			DualBuilders
 		),
-
-		#;[ModuleBuild]
-		#;[DualBuilders]
-		#;prefer = make
 
 	# generated t/ tests
 		[ CompileTests => { fake_home => 1 } ],
-		# ReportVersions::Tiny 1.01
+		qw(
+			ReportVersions::Tiny
+		),
 
 	# generated xt/ tests
 		qw(
 			MetaTests
 			PodSyntaxTests
 			PodCoverageTests
+		),
+			@$pod_link_tests,
+		# Test::Pod::Spelling::CommonMistakes ?
+		qw(
+			PodSpellingTests
 			PortabilityTests
 			KwaliteeTests
 			MinimumVersionTests
 		),
-		# PodSpellingTests
 
 	# manifest: must come after all generated files
 		'Manifest',
@@ -189,18 +237,30 @@ sub configure {
 		),
 
 	# release
-	# @Apocalyptic: -e File::Spec->catfile( File::HomeDir->my_home, '.pause' )
-	#            or -e File::Spec->catfile( '.', '.pause' ) )
 		( $self->fake_release ? 'FakeRelease' : $self->releaser ),
+
+		#[ InstallRelease => { install_command = 'cpanm --local-lib .' } ]
+
 	);
 
-	# TODO: query zilla for phase... if release, annouce which releaser we're using
+	# TODO: query zilla for phase... if release, announce which releaser we're using
 
 #	$self->add_bundle('@Git' => {
 #		tag_format => '%v',
 #		push_to    => [ qw(origin github) ],
 #	});
 
+}
+
+# As of Dist::Zilla 4.102345 pluginbundles don't have log and log_fatal methods
+# but hopefully someday they will... so define our own unless they exist.
+foreach my $method ( qw(log log_fatal) ){
+	unless( __PACKAGE__->can($method) ){
+		no strict 'refs';
+		*$method = $method =~ /fatal/
+			? sub { die($_[1]) }
+			: sub { warn("[$NAME] $_[1]") };
+	}
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -211,13 +271,16 @@ no Moose;
 __END__
 =pod
 
+=for :stopwords Randy Stauner PluginBundle PluginBundles DAGOLDEN RJBS dists ini CPAN
+AnnoCPAN RT CPANTS Kwalitee diff IRC
+
 =head1 NAME
 
 Dist::Zilla::PluginBundle::GopherRepellent - keep those pesky gophers out of your dists!
 
 =head1 VERSION
 
-version 0.004001
+version 0.008004
 
 =head1 SYNOPSIS
 
@@ -225,10 +288,20 @@ version 0.004001
 
 	[@GopherRepellent]
 
+Possible options and their default values:
+
+	auto_prereqs   = 1  ; enable AutoPrereqs
+	fake_release   = 0  ; if true will use FakeRelease instead of 'releaser'
+	is_task        = 0  ; set to true to use TaskWeaver instead of PodWeaver
+	pod_link_tests = 1  ; use the PodLinkTests plugin if available
+	releaser       = UploadToCPAN
+	skip_prereqs   =    ; default empty; corresponds to AutoPrereqs:skip
+	weaver_config  = @GopherRepellent
+
 =head1 DESCRIPTION
 
-This is a L<Dist::Zilla::PluginBundle> to help
-keep those pesky gophers away from your dists.
+This is a L<Dist::Zilla::PluginBundle|Dist::Zilla::Role::PluginBundle::Easy>
+to help keep those pesky gophers away from your dists.
 
 It is roughly equivalent to:
 
@@ -240,6 +313,8 @@ It is roughly equivalent to:
 	[ManifestSkip]          ; custom stuff to skip
 
 	; munge files
+	[Authority]             ; inject $AUTHORITY into modules
+	do_metadata = 1         ; default
 	[PkgVersion]            ; inject $VERSION into modules
 
 	[PodWeaver]             ; munge POD in all modules
@@ -281,16 +356,22 @@ It is roughly equivalent to:
 	[ExtraTests]            ; build system (dzil core [@Basic])
 	[ExecDir]               ; include 'bin/*' as executables
 	[ShareDir]              ; include 'share/' for File::ShareDir
+
 	[MakeMaker]             ; create Makefile.PL
+	[ModuleBuild]           ; create Build.PL
+	[DualBuilders]          ; only require one of the above two (prefer 'build')
 
 	; generate t/ tests
 	[CompileTests]          ; make sure .pm files all compile
 	fake_home = 1           ; fakes $ENV{HOME} just in case
+	[ReportVersions::Tiny]  ; show module versions used in test reports
 
 	; generate xt/ tests
 	[MetaTests]             ; test META
 	[PodSyntaxTests]        ; test POD
 	[PodCoverageTests]      ; test documentation coverage
+	[PodLinkTests]          ; test L<> links in POD (if available)
+	[PodSpellingTests]      ; spell check POD
 	[PortabilityTests]      ; test portability (why? who doesn't use Linux?)
 	[KwaliteeTests]         ; CPANTS
 	[MinimumVersionTests]   ; test that the automatic plugin worked
@@ -310,6 +391,7 @@ L<RJBS|Dist::Zilla::PluginBundle::RJBS> and
 L<DAGOLDEN|Dist::Zilla::PluginBundle::DAGOLDEN>.
 
 =for Pod::Coverage configure
+log log_fatal
 
 =head1 RATIONALE
 
@@ -325,9 +407,10 @@ This bundle is essentially C<BeLike::RWSTAUNER>.
 
 It is subject to change.
 
-I am still new to Dist::Zilla
+I am still new to L<Dist::Zilla>
 and uploading to CPAN
-and am trying to learn how to make good/quality/kwalitee modules.
+and am trying to learn how to make
+good/quality/L<kwalitee|Module::CPANTS::Analyse> modules.
 
 Therefore this bundle may be useful for others
 who aren't quite sure what they want or how they want it,
@@ -337,7 +420,7 @@ Beyond that audience
 this may be mostly for my own use
 (and for people I work with who are less inclined to roll their own),
 but perhaps my choices and documentation will help others along the way
-(or encouarage someone to set me straight).
+(or encourage someone to set me straight).
 
 =head1 SEE ALSO
 
@@ -360,8 +443,6 @@ The Secret of Monkey Island (E<copy> Lucas Arts)
 
 =back
 
-=for :stopwords CPAN AnnoCPAN RT CPANTS Kwalitee diff
-
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
@@ -370,6 +451,9 @@ You can find documentation for this module with the perldoc command.
 
 =head2 Websites
 
+The following websites have more information about this module, and may be of help to you. As always,
+in addition to those websites please use your favorite search engine to discover more resources.
+
 =over 4
 
 =item *
@@ -377,6 +461,12 @@ You can find documentation for this module with the perldoc command.
 Search CPAN
 
 L<http://search.cpan.org/dist/Dist-Zilla-PluginBundle-GopherRepellent>
+
+=item *
+
+RT: CPAN's Bug Tracker
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dist-Zilla-PluginBundle-GopherRepellent>
 
 =item *
 
@@ -398,12 +488,6 @@ L<http://cpanforum.com/dist/Dist-Zilla-PluginBundle-GopherRepellent>
 
 =item *
 
-RT: CPAN's Bug Tracker
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dist-Zilla-PluginBundle-GopherRepellent>
-
-=item *
-
 CPANTS Kwalitee
 
 L<http://cpants.perl.org/dist/overview/Dist-Zilla-PluginBundle-GopherRepellent>
@@ -420,21 +504,20 @@ CPAN Testers Matrix
 
 L<http://matrix.cpantesters.org/?dist=Dist-Zilla-PluginBundle-GopherRepellent>
 
-=item *
-
-Source Code Repository
-
-L<git://github.com/magnificent-tears/dist-zilla-pluginbundle-gopherrepellent.git>
-
-L<http://github.com/magnificent-tears/dist-zilla-pluginbundle-gopherrepellent/tree>
-
 =back
 
-=head2 Bugs
+=head2 Bugs / Feature Requests
 
-Please report any bugs or feature requests to C<bug-dist-zilla-pluginbundle-gopherrepellent at rt.cpan.org>, or through
+Please report any bugs or feature requests by email to C<bug-dist-zilla-pluginbundle-gopherrepellent at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Dist-Zilla-PluginBundle-GopherRepellent>.  I will be
 notified, and then you'll automatically be notified of progress on your bug as I make changes.
+
+=head2 Source Code
+
+
+L<http://github.com/magnificent-tears/Dist-Zilla-PluginBundle-GopherRepellent/tree>
+
+  git clone git://github.com/magnificent-tears/Dist-Zilla-PluginBundle-GopherRepellent.git
 
 =head1 AUTHOR
 
