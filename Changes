@@ -1,8 +1,31 @@
 Revision History for Dist-Zilla-PluginBundle-GopherRepellent
 ============================================================
 
-0.008004
+0.009007
 --------
+
+762b0f0 Include WikiDoc and StopWords in "additions to Default" list
+
+53c141c Document that Test::More 0.96 is always required
+
+757f7c2 Include the Bugtracker plugin in the "roughly equivalent" section
+
+e3b49fd Document the option of setting $ENV{DZIL_FAKERELEASE}
+
+c949662 Comment on PodLinkTests where it's "use" statement would go
+
+4ad1d64 Add minor documentation to remember what comes from the Default Bundle
+
+2a47e26 Remove TODO comment about 'use'ing modules
+
+v0.9 2010-12-30
+---------------
+
+7720c0c Add WikiDoc and USAGE to "roughly equivalent" Description
+
+9a96e1d Put USAGE section below DESCRIPTION (after OVERVIEW)
+
+3bc098c Enable WikiDoc paragraphs in POD
 
 48877c9 Explicitly require base modules so we can specify the required version
 

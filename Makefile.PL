@@ -58,10 +58,11 @@ my %WriteMakefileArgs = (
     'Pod::Weaver::Config::Assembler' => '0',
     'Pod::Weaver::Plugin::StopWords' => '1.000001',
     'Pod::Weaver::Plugin::Transformer' => '0',
+    'Pod::Weaver::Plugin::WikiDoc' => '0',
     'Pod::Weaver::PluginBundle::Default' => '0',
     'Pod::Weaver::Section::Support' => '1.001'
   },
-  'VERSION' => '0.008004',
+  'VERSION' => '0.009007',
   'test' => {
     'TESTS' => 't/*.t'
   }

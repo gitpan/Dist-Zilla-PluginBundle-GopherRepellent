@@ -1,6 +1,6 @@
 package Pod::Weaver::PluginBundle::GopherRepellent;
 BEGIN {
-  $Pod::Weaver::PluginBundle::GopherRepellent::VERSION = '0.008004';
+  $Pod::Weaver::PluginBundle::GopherRepellent::VERSION = '0.009007';
 }
 BEGIN {
   $Pod::Weaver::PluginBundle::GopherRepellent::AUTHORITY = 'cpan:RWSTAUNER';
@@ -14,7 +14,7 @@ use Pod::Weaver 3.101632 ();
 use Pod::Weaver::PluginBundle::Default ();
 use Pod::Weaver::Plugin::StopWords 1.000001 ();
 use Pod::Weaver::Plugin::Transformer ();
-#use Pod::Weaver::Plugin::WikiDoc ();
+use Pod::Weaver::Plugin::WikiDoc ();
 use Pod::Weaver::Section::Support 1.001 ();
 use Pod::Elemental 0.102360 ();
 use Pod::Elemental::Transformer::List ();
@@ -22,16 +22,18 @@ use Pod::Elemental::Transformer::List ();
 use Pod::Weaver::Config::Assembler;
 sub _exp { Pod::Weaver::Config::Assembler->expand_package($_[0]) }
 
-# TODO: use modules
-
 our $NAME = join('', '@', (__PACKAGE__ =~ /([^:]+)$/));
 
 sub mvp_bundle_config {
   my @plugins;
   push @plugins, (
-    #[ "$NAME/WikiDoc",     _exp('-WikiDoc'), {} ],
+	# plugin
+    [ "$NAME/WikiDoc",     _exp('-WikiDoc'), {} ],
+	# default
     [ "$NAME/CorePrep",    _exp('@CorePrep'), {} ],
 
+	# sections
+	# default
     [ "$NAME/Name",        _exp('Name'),      {} ],
     [ "$NAME/Version",     _exp('Version'),   {} ],
 
@@ -39,10 +41,13 @@ sub mvp_bundle_config {
     [ "$NAME/Synopsis",    _exp('Generic'), { header      => 'SYNOPSIS'    } ],
     [ "$NAME/Description", _exp('Generic'), { header      => 'DESCRIPTION' } ],
     [ "$NAME/Overview",    _exp('Generic'), { header      => 'OVERVIEW'    } ],
+	# extra
+    [ "$NAME/Usage",       _exp('Generic'), { header      => 'USAGE'       } ],
 
     #[ "$NAME/Stability",   _exp('Generic'), { header      => 'STABILITY'   } ],
   );
 
+	# default
   for my $plugin (
     [ 'Attributes', _exp('Collect'), { command => 'attr'   } ],
     [ 'Methods',    _exp('Collect'), { command => 'method' } ],
@@ -52,21 +57,25 @@ sub mvp_bundle_config {
     push @plugins, $plugin;
   }
 
+	# default
   push @plugins, (
     [ "$NAME/Leftovers", _exp('Leftovers'), {} ],
     [ "$NAME/postlude",  _exp('Region'),    { region_name => 'postlude' } ],
 
 	# TODO: consider SeeAlso if it ever allows comments with the links
 
+	# extra
 	# include Support section with various cpan links and github repo
     [ "$NAME/Support",   _exp('Support'),
 		{ repository_content => '', repository_link => 'both' }
 	],
 
+	# default
     [ "$NAME/Authors",   _exp('Authors'),   {} ],
     [ "$NAME/Legal",     _exp('Legal'),     {} ],
-    [ "$NAME/List",      _exp('-Transformer'), { 'transformer' => 'List' } ],
 
+	# plugins
+	[ "$NAME/List",      _exp('-Transformer'), { 'transformer' => 'List' } ],
 	[ "$NAME/StopWords", _exp('-StopWords'), {} ],
   );
 
@@ -79,7 +88,7 @@ sub mvp_bundle_config {
 __END__
 =pod
 
-=for :stopwords Randy Stauner PluginBundle
+=for :stopwords Randy Stauner PluginBundle WikiDoc
 
 =head1 NAME
 
@@ -87,7 +96,7 @@ Pod::Weaver::PluginBundle::GopherRepellent - keep those pesky gophers out of you
 
 =head1 VERSION
 
-version 0.008004
+version 0.009007
 
 =head1 SYNOPSIS
 
@@ -118,10 +127,19 @@ Inserts a SUPPORT section to the POD just before AUTHOR
 
 Adds the List Transformer
 
+=item *
+
+Enables WikiDoc formatting
+
+=item *
+
+Generates and collects stopwords
+
 =back
 
 It is roughly equivalent to:
 
+	[WikiDoc]                 ; transform wikidoc sections to POD
 	[@CorePrep]               ; [@Default]
 
 	[Name]                    ; [@Default]
@@ -132,6 +150,7 @@ It is roughly equivalent to:
 	[Generic / SYNOPSIS]      ; [@Default]
 	[Generic / DESCRIPTION]   ; [@Default]
 	[Generic / OVERVIEW]      ; [@Default]
+	[Generic / USAGE]         ; Put USAGE section near the top
 
 	[Collect / ATTRIBUTES]    ; [@Default]
 	command = attr

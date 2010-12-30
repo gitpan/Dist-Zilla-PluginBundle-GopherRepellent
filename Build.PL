@@ -20,7 +20,7 @@ my %module_build_args = (
     'Randy Stauner <rwstauner@cpan.org>'
   ],
   'dist_name' => 'Dist-Zilla-PluginBundle-GopherRepellent',
-  'dist_version' => '0.008004',
+  'dist_version' => '0.009007',
   'license' => 'perl',
   'module_name' => 'Dist::Zilla::PluginBundle::GopherRepellent',
   'recommends' => {
@@ -61,6 +61,7 @@ my %module_build_args = (
     'Pod::Weaver::Config::Assembler' => '0',
     'Pod::Weaver::Plugin::StopWords' => '1.000001',
     'Pod::Weaver::Plugin::Transformer' => '0',
+    'Pod::Weaver::Plugin::WikiDoc' => '0',
     'Pod::Weaver::PluginBundle::Default' => '0',
     'Pod::Weaver::Section::Support' => '1.001',
     'perl' => '5.006'

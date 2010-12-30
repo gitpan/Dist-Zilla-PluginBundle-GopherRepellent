@@ -85,6 +85,7 @@ eval { $v .= pmver('Pod::Weaver','3.101632') };
 eval { $v .= pmver('Pod::Weaver::Config::Assembler','any version') };
 eval { $v .= pmver('Pod::Weaver::Plugin::StopWords','1.000001') };
 eval { $v .= pmver('Pod::Weaver::Plugin::Transformer','any version') };
+eval { $v .= pmver('Pod::Weaver::Plugin::WikiDoc','any version') };
 eval { $v .= pmver('Pod::Weaver::PluginBundle::Default','any version') };
 eval { $v .= pmver('Pod::Weaver::Section::Support','1.001') };
 eval { $v .= pmver('Test::More','0.96') };

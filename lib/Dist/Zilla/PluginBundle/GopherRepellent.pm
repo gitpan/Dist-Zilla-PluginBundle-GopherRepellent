@@ -1,6 +1,6 @@
 package Dist::Zilla::PluginBundle::GopherRepellent;
 BEGIN {
-  $Dist::Zilla::PluginBundle::GopherRepellent::VERSION = '0.008004';
+  $Dist::Zilla::PluginBundle::GopherRepellent::VERSION = '0.009007';
 }
 BEGIN {
   $Dist::Zilla::PluginBundle::GopherRepellent::AUTHORITY = 'cpan:RWSTAUNER';
@@ -31,6 +31,7 @@ use Dist::Zilla::Plugin::MinimumPerl 0.02 ();
 use Dist::Zilla::Plugin::MinimumVersionTests ();
 use Dist::Zilla::Plugin::PkgVersion ();
 use Dist::Zilla::Plugin::PodCoverageTests ();
+### Dist::Zilla::Plugin::PodLinkTests (); # suggested not required
 use Dist::Zilla::Plugin::PodSpellingTests ();
 use Dist::Zilla::Plugin::PodSyntaxTests ();
 use Dist::Zilla::Plugin::PodWeaver ();
@@ -280,7 +281,7 @@ Dist::Zilla::PluginBundle::GopherRepellent - keep those pesky gophers out of you
 
 =head1 VERSION
 
-version 0.008004
+version 0.009007
 
 =head1 SYNOPSIS
 
@@ -297,6 +298,8 @@ Possible options and their default values:
 	releaser       = UploadToCPAN
 	skip_prereqs   =    ; default empty; corresponds to AutoPrereqs:skip
 	weaver_config  = @GopherRepellent
+
+The C<fake_release> option also respects C<$ENV{DZIL_FAKERELEASE}>.
 
 =head1 DESCRIPTION
 
@@ -330,6 +333,7 @@ It is roughly equivalent to:
 	log_format = format:%h %s%n
 
 	; metadata
+	[Bugtracker]            ; include bugtracker URL and email address (uses RT)
 	[Repository]            ; determine git information (if -e ".git")
 	[GithubMeta]            ; overrides [Repository] if repository is on github
 
@@ -352,6 +356,9 @@ It is roughly equivalent to:
 	[MetaConfig]            ; include Dist::Zilla info in distmeta (dzil core)
 	[MetaYAML]              ; include META.yml (v1.4) (dzil core [@Basic])
 	[MetaJSON]              ; include META.json (v2) (more info than META.yml)
+
+	[Prereqs / TestRequires]
+	Test::More = 0.96       ; require recent Test::More (including subtests)
 
 	[ExtraTests]            ; build system (dzil core [@Basic])
 	[ExecDir]               ; include 'bin/*' as executables

@@ -27,10 +27,10 @@ no_index:
 provides:
   Dist::Zilla::PluginBundle::GopherRepellent:
     file: lib/Dist/Zilla/PluginBundle/GopherRepellent.pm
-    version: 0.008004
+    version: 0.009007
   Pod::Weaver::PluginBundle::GopherRepellent:
     file: lib/Pod/Weaver/PluginBundle/GopherRepellent.pm
-    version: 0.008004
+    version: 0.009007
 recommends:
   Dist::Zilla::Plugin::PodLinkTests: 1.003
 requires:
@@ -67,6 +67,7 @@ requires:
   Pod::Weaver::Config::Assembler: 0
   Pod::Weaver::Plugin::StopWords: 1.000001
   Pod::Weaver::Plugin::Transformer: 0
+  Pod::Weaver::Plugin::WikiDoc: 0
   Pod::Weaver::PluginBundle::Default: 0
   Pod::Weaver::Section::Support: 1.001
   perl: 5.006
@@ -74,7 +75,7 @@ resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-PluginBundle-GopherRepellent
   homepage: http://github.com/magnificent-tears/Dist-Zilla-PluginBundle-GopherRepellent/tree
   repository: git://github.com/magnificent-tears/Dist-Zilla-PluginBundle-GopherRepellent.git
-version: 0.008004
+version: 0.009007
 x_Dist_Zilla:
   plugins:
     -
@@ -196,7 +197,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::ReportVersions::Tiny
       name: '@GopherRepellent/ReportVersions::Tiny'
-      version: 1.02
+      version: 1.03
     -
       class: Dist::Zilla::Plugin::MetaTests
       name: '@GopherRepellent/MetaTests'
