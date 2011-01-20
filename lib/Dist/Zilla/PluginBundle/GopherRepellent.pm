@@ -1,6 +1,6 @@
 package Dist::Zilla::PluginBundle::GopherRepellent;
 BEGIN {
-  $Dist::Zilla::PluginBundle::GopherRepellent::VERSION = '0.009007';
+  $Dist::Zilla::PluginBundle::GopherRepellent::VERSION = '1.000007';
 }
 BEGIN {
   $Dist::Zilla::PluginBundle::GopherRepellent::AUTHORITY = 'cpan:RWSTAUNER';
@@ -10,9 +10,9 @@ BEGIN {
 use strict;
 use warnings;
 use Moose;
-use Moose::Autobox;
 use Dist::Zilla 4.102345;
 with 'Dist::Zilla::Role::PluginBundle::Easy';
+# Dist::Zilla::Role::DynamicConfig is not necessary: payload is already dynamic
 
 use Dist::Zilla::PluginBundle::Basic (); # use most of the plugins included
 use Dist::Zilla::Plugin::Authority 1.001 ();
@@ -41,68 +41,92 @@ use Dist::Zilla::Plugin::ReportVersions::Tiny 1.01 ();
 use Dist::Zilla::Plugin::TaskWeaver 0.101620 ();
 use Pod::Weaver::PluginBundle::GopherRepellent ();
 
-our $NAME = join('', '@', (__PACKAGE__ =~ /([^:]+)$/));
+sub _bundle_name {
+	my $class = @_ ? ref $_[0] || $_[0] : __PACKAGE__;
+	join('', '@', ($class =~ /([^:]+)$/));
+}
 
-# attributes
+sub _default_attributes {
+	return {
+		auto_prereqs   => [Bool => 1],
+		fake_release   => [Bool => $ENV{DZIL_FAKERELEASE}],
+		is_task        => [Bool => 0],
+		pod_link_tests => [Bool => 1],
+		releaser       => [Str  => 'UploadToCPAN'],
+		skip_plugins   => [Str  => ''],
+		skip_prereqs   => [Str  => ''],
+		weaver_config  => [Str  => $_[0]->_bundle_name],
+	};
+}
 
-has auto_prereqs => (
-	is      => 'ro',
-	isa     => 'Bool',
-	lazy    => 1,
-	default => sub {
-		exists $_[0]->payload->{auto_prereqs}
-		     ? $_[0]->payload->{auto_prereqs}
-			 : 1
-	}
-);
+sub _generate_attribute {
+	my ($self, $key) = @_;
+	has $key => (
+		is      => 'ro',
+		isa     => $self->_default_attributes->{$key}[0],
+		lazy    => 1,
+		default => sub {
+			# if it exists in the payload
+			exists $_[0]->payload->{$key}
+				# use it
+				?  $_[0]->payload->{$key}
+				# else get it from the defaults (for subclasses)
+				:  $_[0]->_default_attributes->{$key}[1];
+		}
+	);
+}
 
-has fake_release => (
-	is      => 'ro',
-	isa     => 'Bool',
-	lazy    => 1,
-	default => sub { $_[0]->payload->{fake_release} || $ENV{DZIL_FAKERELEASE} }
-);
+{
+	# generate attributes
+	__PACKAGE__->_generate_attribute($_)
+		for keys %{ __PACKAGE__->_default_attributes };
+}
 
-has is_task => (
-	is      => 'ro',
-	isa     => 'Bool',
-	lazy    => 1,
-	default => sub { $_[0]->payload->{is_task} }
-);
-
-has pod_link_tests => (
-	is      => 'ro',
-	isa     => 'Bool',
-	lazy    => 1,
-	default => sub {
-		exists $_[0]->payload->{pod_link_tests}
-		     ? $_[0]->payload->{pod_link_tests}
-		     : 1
-	}
-);
-
-has releaser => (
-	is      => 'ro',
-	isa     => 'Str',
-	lazy    => 1,
-	default => sub { $_[0]->payload->{releaser} || 'UploadToCPAN' }
-);
-
-has skip_prereqs => (
-	is      => 'ro',
-	isa     => 'Str',
-	lazy    => 1,
-	default => sub { $_[0]->payload->{skip_prereqs} || '' }
-);
-
-has weaver_config => (
-	is      => 'ro',
-	isa     => 'Str',
-	lazy    => 1,
-	default => sub { $_[0]->payload->{weaver_config} || $NAME }
-);
-
+# main
 sub configure {
+	my ($self) = @_;
+
+	my $skip = $self->skip_plugins;
+	$skip &&= qr/$skip/;
+
+	my $dynamic = $self->payload;
+	my @bundle = $self->_bundled_plugins;
+	my @plugins;
+
+	foreach my $spec ( @bundle ){
+		# convert lone string to arrayref with config hashref
+		$spec = [$spec, {}]
+			unless ref $spec;
+
+		# use -1 in case there's a plugin class: [$name, $class, {}]
+		# NOTE: $conf retains its reference (modifications alter $spec)
+		my ($name, $conf) = @$spec[0, -1];
+
+		# exclude any plugins that match 'skip_plugins'
+		next if $skip && $name =~ $skip;
+
+		# search the dynamic config for anything matching the current plugin
+		while( my ($key, $val) = each %$dynamic ){
+			# match keys like Plugin::Name:attr and PlugName/attr@
+			next unless
+				my ($attr, $over) = ($key =~ /^(?:$name)\W+(\w+)(\W*)$/);
+
+			# if its already an arrayref
+			if( ref(my $current = $conf->{$attr}) eq 'ARRAY' ){
+				# overwrite if specified, otherwise append
+				$val = $over ? [$val] : [@$current, $val];
+			}
+			$conf->{$attr} = $val;
+		}
+
+		push(@plugins, $spec);
+	};
+
+	$self->add_plugins(@plugins);
+}
+
+# return a list of plugin specs (to be sent to add_plugins())
+sub _bundled_plugins {
 	my ($self) = @_;
 
 	# optional... it was difficult to install these
@@ -119,9 +143,9 @@ sub configure {
 	}
 
 	$self->log_fatal("you must not specify both weaver_config and is_task")
-		if $self->is_task and $self->weaver_config ne $NAME;
+		if $self->is_task and $self->weaver_config ne $self->_bundle_name;
 
-	$self->add_plugins(
+	return (
 	
 	# provide version
 		'Git::DescribeVersion',
@@ -246,12 +270,12 @@ sub configure {
 
 	# TODO: query zilla for phase... if release, announce which releaser we're using
 
+}
+
 #	$self->add_bundle('@Git' => {
 #		tag_format => '%v',
 #		push_to    => [ qw(origin github) ],
 #	});
-
-}
 
 # As of Dist::Zilla 4.102345 pluginbundles don't have log and log_fatal methods
 # but hopefully someday they will... so define our own unless they exist.
@@ -260,7 +284,7 @@ foreach my $method ( qw(log log_fatal) ){
 		no strict 'refs';
 		*$method = $method =~ /fatal/
 			? sub { die($_[1]) }
-			: sub { warn("[$NAME] $_[1]") };
+			: sub { warn("[${\$_[0]->_bundle_name}] $_[1]") };
 	}
 }
 
@@ -272,8 +296,8 @@ no Moose;
 __END__
 =pod
 
-=for :stopwords Randy Stauner PluginBundle PluginBundles DAGOLDEN RJBS dists ini CPAN
-AnnoCPAN RT CPANTS Kwalitee diff IRC
+=for :stopwords Randy Stauner PluginBundle PluginBundles DAGOLDEN RJBS dists ini arrayrefs
+CPAN AnnoCPAN RT CPANTS Kwalitee diff IRC
 
 =head1 NAME
 
@@ -281,13 +305,27 @@ Dist::Zilla::PluginBundle::GopherRepellent - keep those pesky gophers out of you
 
 =head1 VERSION
 
-version 0.009007
+version 1.000007
 
 =head1 SYNOPSIS
 
 	# dist.ini
 
 	[@GopherRepellent]
+
+=head1 DESCRIPTION
+
+This is a L<Dist::Zilla::PluginBundle|Dist::Zilla::Role::PluginBundle::Easy>
+to help keep those pesky gophers away from your dists.
+
+This Bundle was heavily influenced by the bundles of
+L<RJBS|Dist::Zilla::PluginBundle::RJBS> and
+L<DAGOLDEN|Dist::Zilla::PluginBundle::DAGOLDEN>.
+
+=for Pod::Coverage configure
+log log_fatal
+
+=head1 CONFIGURATION
 
 Possible options and their default values:
 
@@ -296,17 +334,71 @@ Possible options and their default values:
 	is_task        = 0  ; set to true to use TaskWeaver instead of PodWeaver
 	pod_link_tests = 1  ; use the PodLinkTests plugin if available
 	releaser       = UploadToCPAN
+	skip_plugins   =    ; default empty; a regexp of plugin names to exclude
 	skip_prereqs   =    ; default empty; corresponds to AutoPrereqs:skip
 	weaver_config  = @GopherRepellent
 
 The C<fake_release> option also respects C<$ENV{DZIL_FAKERELEASE}>.
 
-=head1 DESCRIPTION
+B<Note> that you can also specify attributes for any of the bundled plugins.
+This works like L<Dist::Zilla::Role::Stash::Plugins> except that the role is
+not actually used (and there is no stash) because PluginBundles already have
+a dynamic configuration.
+The option should be the plugin name and the attribute separated by a colon
+(or a dot, or any other non-word character(s)).
 
-This is a L<Dist::Zilla::PluginBundle|Dist::Zilla::Role::PluginBundle::Easy>
-to help keep those pesky gophers away from your dists.
+For example:
 
-It is roughly equivalent to:
+	[@GopherRepellent]
+	AutoPrereqs:skip = Bad::Module
+
+B<Note> that this is different than
+
+	[@GopherRepellent]
+	[AutoPrereqs]
+	skip = Bad::Module
+
+which will load the plugin a second time.
+The first example actually alters the plugin configuration
+as it is included by the Bundle.
+
+String (or boolean) attributes will overwrite any in the Bundle:
+
+	[@GopherRepellent]
+	CompileTests.fake_home = 0
+
+Arrayref attributes will be appended to any in the bundle:
+
+	[@GopherRepellent]
+	MetaNoIndex:directory = another-dir
+
+Since the Bundle initializes MetaNoIndex:directory to an arrayref
+of directories, C<another-dir> will be appended to that arrayref.
+
+You can overwrite the attribute by adding non-word characters to the end of it:
+
+	[@GopherRepellent]
+	MetaNoIndex:directory@ = another-dir
+	; or MetaNoIndex:directory[] = another-dir
+
+You can use any non-word characters: use what makes the most sense to you.
+B<Note> that you cannot specify an attribute more than once
+(since the configuration is dynamic
+and the Bundle cannot predeclare unknown attributes as arrayrefs).
+
+If your situation is more complicated you can use the C<skip_plugins>
+attribute to have the Bundle ignore that plugin
+and then you can add it yourself:
+
+	[MetaNoIndex]
+	directory = one-dir
+	directory = another-dir
+	[@GopherRepellent]
+	skip_plugins = MetaNoIndex
+
+=head1 EQUIVALENT F<dist.ini>
+
+This bundle is roughly equivalent to:
 
 	[Git::DescribeVersion]  ; count commits from last tag to provide version
 
@@ -393,13 +485,6 @@ It is roughly equivalent to:
 	; set 'releaser = AlternatePlugin' to use a different releaser plugin
 	; 'fake_release' will override the 'releaser' (useful for sub-bundles)
 
-This Bundle was heavily influenced by the bundles of
-L<RJBS|Dist::Zilla::PluginBundle::RJBS> and
-L<DAGOLDEN|Dist::Zilla::PluginBundle::DAGOLDEN>.
-
-=for Pod::Coverage configure
-log log_fatal
-
 =head1 RATIONALE
 
 I built my own PluginBundles
@@ -436,6 +521,10 @@ but perhaps my choices and documentation will help others along the way
 =item *
 
 L<Dist::Zilla>
+
+=item *
+
+L<Dist::Zilla::Role::PluginBundle::Easy>
 
 =item *
 

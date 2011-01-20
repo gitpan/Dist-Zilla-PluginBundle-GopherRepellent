@@ -78,7 +78,6 @@ eval { $v .= pmver('File::Find','any version') };
 eval { $v .= pmver('File::Temp','any version') };
 eval { $v .= pmver('Module::Build','0.3601') };
 eval { $v .= pmver('Moose','any version') };
-eval { $v .= pmver('Moose::Autobox','any version') };
 eval { $v .= pmver('Pod::Elemental','0.102360') };
 eval { $v .= pmver('Pod::Elemental::Transformer::List','any version') };
 eval { $v .= pmver('Pod::Weaver','3.101632') };

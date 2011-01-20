@@ -51,7 +51,6 @@ my %WriteMakefileArgs = (
     'Dist::Zilla::Role::PluginBundle::Easy' => '0',
     'Dist::Zilla::Stash::PodWeaver' => '1.001000',
     'Moose' => '0',
-    'Moose::Autobox' => '0',
     'Pod::Elemental' => '0.102360',
     'Pod::Elemental::Transformer::List' => '0',
     'Pod::Weaver' => '3.101632',
@@ -62,7 +61,7 @@ my %WriteMakefileArgs = (
     'Pod::Weaver::PluginBundle::Default' => '0',
     'Pod::Weaver::Section::Support' => '1.001'
   },
-  'VERSION' => '0.009007',
+  'VERSION' => '1.000007',
   'test' => {
     'TESTS' => 't/*.t'
   }

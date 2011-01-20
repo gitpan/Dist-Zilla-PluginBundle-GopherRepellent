@@ -20,7 +20,7 @@ my %module_build_args = (
     'Randy Stauner <rwstauner@cpan.org>'
   ],
   'dist_name' => 'Dist-Zilla-PluginBundle-GopherRepellent',
-  'dist_version' => '0.009007',
+  'dist_version' => '1.000007',
   'license' => 'perl',
   'module_name' => 'Dist::Zilla::PluginBundle::GopherRepellent',
   'recommends' => {
@@ -54,7 +54,6 @@ my %module_build_args = (
     'Dist::Zilla::Role::PluginBundle::Easy' => '0',
     'Dist::Zilla::Stash::PodWeaver' => '1.001000',
     'Moose' => '0',
-    'Moose::Autobox' => '0',
     'Pod::Elemental' => '0.102360',
     'Pod::Elemental::Transformer::List' => '0',
     'Pod::Weaver' => '3.101632',

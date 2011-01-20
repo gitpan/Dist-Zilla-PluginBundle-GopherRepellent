@@ -1,8 +1,42 @@
 Revision History for Dist-Zilla-PluginBundle-GopherRepellent
 ============================================================
 
-0.009007
+1.000007
 --------
+
+570f7cf Alter POD to satisfy spelling test
+
+40fb666 Don't require Moose::Autobox since we don't use it
+
+077c38a Compact attribute specification by eliminating redundant code
+
+bbfe062 Test configuration attributes
+
+b543e83 Document dynamic configuration of plugin attributes
+
+9777723 Allow arrayref attributes to append or overwrite
+
+0724160 Look for the hash in the last element of a plugin arrayref
+
+v1.0 2011-01-19
+---------------
+
+7a58f25 Allow any attribute to be set for included plugins
+
+3d1fcb6 Default skip_plugins to a blank string to appease type constraint
+
+b42ba12 Use [Bootstrap::lib] when building self
+
+v0.10 2011-01-18
+----------------
+
+e0c5389 Add a 'skip_plugins' option for excluding plugins by name
+
+ad654c6 Make building of plugin list a separate method
+
+b8027c2 Replace global $NAME variable with a class method
+
+1fc85aa Refactor and simplify with more methods
 
 762b0f0 Include WikiDoc and StopWords in "additions to Default" list
 

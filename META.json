@@ -65,7 +65,6 @@
             "Dist::Zilla::Role::PluginBundle::Easy" : 0,
             "Dist::Zilla::Stash::PodWeaver" : "1.001000",
             "Moose" : 0,
-            "Moose::Autobox" : 0,
             "Pod::Elemental" : "0.102360",
             "Pod::Elemental::Transformer::List" : 0,
             "Pod::Weaver" : "3.101632",
@@ -89,11 +88,11 @@
    "provides" : {
       "Dist::Zilla::PluginBundle::GopherRepellent" : {
          "file" : "lib/Dist/Zilla/PluginBundle/GopherRepellent.pm",
-         "version" : "0.009007"
+         "version" : "1.000007"
       },
       "Pod::Weaver::PluginBundle::GopherRepellent" : {
          "file" : "lib/Pod/Weaver/PluginBundle/GopherRepellent.pm",
-         "version" : "0.009007"
+         "version" : "1.000007"
       }
    },
    "release_status" : "stable",
@@ -109,7 +108,7 @@
          "web" : "http://github.com/magnificent-tears/Dist-Zilla-PluginBundle-GopherRepellent/tree"
       }
    },
-   "version" : "0.009007",
+   "version" : "1.000007",
    "x_Dist_Zilla" : {
       "plugins" : [
          {
