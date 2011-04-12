@@ -1,6 +1,14 @@
+#
+# This file is part of Dist-Zilla-PluginBundle-GopherRepellent
+#
+# This software is copyright (c) 2010 by Randy Stauner.
+#
+# This is free software; you can redistribute it and/or modify it under
+# the same terms as the Perl 5 programming language system itself.
+#
 package Pod::Weaver::PluginBundle::GopherRepellent;
 BEGIN {
-  $Pod::Weaver::PluginBundle::GopherRepellent::VERSION = '1.000007';
+  $Pod::Weaver::PluginBundle::GopherRepellent::VERSION = '1.002';
 }
 BEGIN {
   $Pod::Weaver::PluginBundle::GopherRepellent::AUTHORITY = 'cpan:RWSTAUNER';
@@ -12,7 +20,7 @@ use warnings;
 
 use Pod::Weaver 3.101632 ();
 use Pod::Weaver::PluginBundle::Default ();
-use Pod::Weaver::Plugin::StopWords 1.000001 ();
+use Pod::Weaver::Plugin::StopWords 1.001005 ();
 use Pod::Weaver::Plugin::Transformer ();
 use Pod::Weaver::Plugin::WikiDoc ();
 use Pod::Weaver::Section::Support 1.001 ();
@@ -113,7 +121,12 @@ Pod::Weaver::PluginBundle::GopherRepellent - keep those pesky gophers out of you
 
 =head1 VERSION
 
-version 1.000007
+version 1.002
+
+=head1 DEPRECATED
+
+This module is deprecated.
+It will soon be renamed into the Author namespace.
 
 =head1 SYNOPSIS
 

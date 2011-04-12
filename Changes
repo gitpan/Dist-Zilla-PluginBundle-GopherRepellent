@@ -1,198 +1,49 @@
-Revision History for Dist-Zilla-PluginBundle-GopherRepellent
-============================================================
+Revision history for Dist-Zilla-PluginBundle-GopherRepellent
 
-1.000007
---------
+1.002 2011-04-11
 
-570f7cf Alter POD to satisfy spelling test
+  [Deprecations]
+  - The current namespace is deprecated.
+    This always was/should have been an Author bundle.
 
-40fb666 Don't require Moose::Autobox since we don't use it
+  [Add Dist::Zilla Plugins]
+  - Prepender
+  - Git::NextVersion (instead of Git::DescribeVersion)
 
-077c38a Compact attribute specification by eliminating redundant code
+1.001 2011-02-10
 
-bbfe062 Test configuration attributes
+  - Manage Changes respectably by replacing GitFmtChanges plugin
+  with NextRelease, CheckChangesHasContent, and CPANChangesTests
 
-b543e83 Document dynamic configuration of plugin attributes
+1.000007 2011-01-19
 
-9777723 Allow arrayref attributes to append or overwrite
+  - remove Moose::Autobox dependency
+  - allow attributes to be overridden in dist.ini for any included plugin
+  - add 'skip_plugins' option
 
-0724160 Look for the hash in the last element of a plugin arrayref
+0.009007 2010-12-30
 
-v1.0 2011-01-19
----------------
+  - Use Pod::Weaver::Plugin::WikiDoc
 
-7a58f25 Allow any attribute to be set for included plugins
+0.008004 2010-12-16
 
-3d1fcb6 Default skip_plugins to a blank string to appease type constraint
+  - Require Dist::Zilla::Stash::PodWeaver
 
-b42ba12 Use [Bootstrap::lib] when building self
+  [Add Dist::Zilla Plugins]
+  - Authority
+  - DualBuilders (prefer 'build')
+  - PodLinkTests if available
+  - PodSpellingTests
+  - ReportVersions::Tiny
 
-v0.10 2011-01-18
-----------------
+  [Add Pod::Weaver Plugins]
+  - StopWords
 
-e0c5389 Add a 'skip_plugins' option for excluding plugins by name
+0.004001 2010-11-17
 
-ad654c6 Make building of plugin list a separate method
+  - Use Dist::Zilla::Plugin::GithubMeta
+  - Lower required version of Pod::Weaver::Section::Support
 
-b8027c2 Replace global $NAME variable with a class method
+0.003011 2010-11-15
 
-1fc85aa Refactor and simplify with more methods
-
-762b0f0 Include WikiDoc and StopWords in "additions to Default" list
-
-53c141c Document that Test::More 0.96 is always required
-
-757f7c2 Include the Bugtracker plugin in the "roughly equivalent" section
-
-e3b49fd Document the option of setting $ENV{DZIL_FAKERELEASE}
-
-c949662 Comment on PodLinkTests where it's "use" statement would go
-
-4ad1d64 Add minor documentation to remember what comes from the Default Bundle
-
-2a47e26 Remove TODO comment about 'use'ing modules
-
-v0.9 2010-12-30
----------------
-
-7720c0c Add WikiDoc and USAGE to "roughly equivalent" Description
-
-9a96e1d Put USAGE section below DESCRIPTION (after OVERVIEW)
-
-3bc098c Enable WikiDoc paragraphs in POD
-
-48877c9 Explicitly require base modules so we can specify the required version
-
-89e42f1 Remove commented idea that I don't care to remember
-
-d0ed179 Remove unnecessary testing for Section::Support features now that the correct version 'use'd
-
-92f9761 Use ReportVersions::Tiny to help with test reports
-
-v0.8 2010-12-16
----------------
-
-e6b2fb0 Use DualBuilders to provide both Module::Build and EUMM (but prefer 'build')
-
-e33b24e Comment InstallRelease Plugin to consider for later
-
-40b859b Add comment about possibly using Pod::Spelling::CommonMistakes in the future
-
-4a3f3c1 Fix required version typo for DZ Plugin PodLinkTests
-
-e04c4b8 Make Stash::PodWeaver a prerequisite
-
-ba65cb2 Add TODO Comment to remember Section::SeeAlso for the future
-
-e76afef Explicitly 'use' StopWords and Transformer plugin
-
-141b99c Update version requirement for Section::Support to 1.001
-
-57ec308 Add Pod::Coverage hints for log and log_fatal
-
-64998bd Add attributes (and their default values) to the Synopsis POD Section
-
-v0.7 2010-12-10
----------------
-
-55f507f Make PodLinkTests configurable and not a requirement
-
-932e278 Define our own log() and log_fatal() methods unless the package already has them
-
-1374f24 Add TODO comment about determining the dzil phase and announcing the Releaser
-
-95d75bb Add [commented out] MetaData::BuiltWith plugin because I'd like to use it but it's currently broken
-
-3031a2e Add some comments about MetaNoIndex plugin
-
-1c1690e Document addition of Authority plugin in POD
-
-v0.6 2010-12-09
----------------
-
-4b3c4c6 Use new PodLinkTests plugin
-
-6acc2bd Set minimum Dist::Zilla version to latest and greatest
-
-71125ba Add Authority plugin
-
-16afedb Expand MetaProvides::Package specification for consistency
-
-640da0a Link to Lucas Arts from README
-
-4f4fdf8 Link to external modules in README
-
-1efa95d Change unnecessary heading to italics
-
-b97e431 Restyle README POD slightly
-
-dd23b51 Explicitly 'use' plugins previously not specified
-
-13e7657 Add stopwords to POD
-
-6bbc9dc Fix typo in POD
-
-f381636 Add PodSpellingTests to 'Roughly Equivalent' POD
-
-v0.5 2010-11-24
----------------
-
-7541bd8 Use PodSpellingTests to generate a pod spell check in xt/
-
-c2e95fa Add the StopWords plugin to generate and gather stopwords at the top
-
-975bf97 Clarify note about list transformer
-
-9d8786a Link to Dist::Zilla and Module::CPANTS::Analyse when referring to dz and kwalitee
-
-ef60458 Wrap (ini) file names with F<>
-
-e447151 Fix broken link: point to DZ::Role::PluginBundle::Easy
-
-7fc2d4d Let GithubMeta plugin override Repository (if on github)
-
-v0.4 2010-11-17
----------------
-
-fb193f6 Feature-test PW::Section::Support instead of requiring a version that doesn't exist
-
-8a558b8 Use latest Repository plugin and add Bugtracker plugin
-
-b41b928 Change POD subtly to be slightly more readable
-
-46d90a9 Improve ini-related POD for Weaver bundle
-
-412ba4f Add example weaver.ini
-
-c28eeb1 Reorder sections to match documentation
-
-52f65b0 Explicitly list MetaNoIndex configuration in POD
-
-ce6221a Add Pod::Coverage hint for 'configure'
-
-ab662cb Add a few comments about ideas from Apocalypse
-
-2d9ff83 Add [untested] 'releaser' attribute (defaulted to UploadToCPAN)
-
-b28cf36 Use config_slice method to make code more clear/consistent/simple
-
-08570d3 Comment on plugins (and versions) to consider for the future
-
-v0.3 2010-11-15
----------------
-
-983478c Improve META: describe provided packages and directories to ignore
-
-53f09a0 "use" required modules to ensure availability
-
-08da34d Merge CAVEATS into RATIONALE and expound on the intention and possible audience
-
-1a18134 Add RATIONALE and SEE ALSO sections to POD
-
-f84632f Add example dist.ini
-
-bd474ee Add README file outside of distribution to make github happy
-
-===================================
-End of changes in the last 365 days
-===================================
+  - Initial Release to CPAN

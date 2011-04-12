@@ -1,6 +1,14 @@
+#
+# This file is part of Dist-Zilla-PluginBundle-GopherRepellent
+#
+# This software is copyright (c) 2010 by Randy Stauner.
+#
+# This is free software; you can redistribute it and/or modify it under
+# the same terms as the Perl 5 programming language system itself.
+#
 package Dist::Zilla::PluginBundle::GopherRepellent;
 BEGIN {
-  $Dist::Zilla::PluginBundle::GopherRepellent::VERSION = '1.000007';
+  $Dist::Zilla::PluginBundle::GopherRepellent::VERSION = '1.002';
 }
 BEGIN {
   $Dist::Zilla::PluginBundle::GopherRepellent::AUTHORITY = 'cpan:RWSTAUNER';
@@ -18,10 +26,11 @@ use Dist::Zilla::PluginBundle::Basic (); # use most of the plugins included
 use Dist::Zilla::Plugin::Authority 1.001 ();
 use Dist::Zilla::Plugin::Bugtracker ();
 #use Dist::Zilla::Plugin::CheckExtraTests ();
+use Dist::Zilla::Plugin::CheckChangesHasContent 0.003 ();
 use Dist::Zilla::Plugin::CompileTests 1.100740 ();
+use Dist::Zilla::Plugin::CPANChangesTests ();
 use Dist::Zilla::Plugin::DualBuilders 1.001 (); # only runs tests once
-use Dist::Zilla::Plugin::Git::DescribeVersion 0.006 ();
-use Dist::Zilla::Plugin::GitFmtChanges 0.003 ();
+use Dist::Zilla::Plugin::Git::NextVersion ();
 use Dist::Zilla::Plugin::GithubMeta 0.10 ();
 use Dist::Zilla::Plugin::KwaliteeTests ();
 #use Dist::Zilla::Plugin::MetaData::BuiltWith (); # FIXME: see comment below
@@ -29,6 +38,7 @@ use Dist::Zilla::Plugin::MetaNoIndex 1.101130 ();
 use Dist::Zilla::Plugin::MetaProvides::Package 1.11044404 ();
 use Dist::Zilla::Plugin::MinimumPerl 0.02 ();
 use Dist::Zilla::Plugin::MinimumVersionTests ();
+use Dist::Zilla::Plugin::NextRelease ();
 use Dist::Zilla::Plugin::PkgVersion ();
 use Dist::Zilla::Plugin::PodCoverageTests ();
 ### Dist::Zilla::Plugin::PodLinkTests (); # suggested not required
@@ -36,16 +46,19 @@ use Dist::Zilla::Plugin::PodSpellingTests ();
 use Dist::Zilla::Plugin::PodSyntaxTests ();
 use Dist::Zilla::Plugin::PodWeaver ();
 use Dist::Zilla::Plugin::PortabilityTests ();
+use Dist::Zilla::Plugin::Prepender 1.100960 ();
 use Dist::Zilla::Plugin::Repository 0.16 (); # deprecates github_http
 use Dist::Zilla::Plugin::ReportVersions::Tiny 1.01 ();
 use Dist::Zilla::Plugin::TaskWeaver 0.101620 ();
 use Pod::Weaver::PluginBundle::GopherRepellent ();
 
+# cannot use $self->name for class methods
 sub _bundle_name {
 	my $class = @_ ? ref $_[0] || $_[0] : __PACKAGE__;
 	join('', '@', ($class =~ /([^:]+)$/));
 }
 
+# TODO: consider an option for using ReportPhase
 sub _default_attributes {
 	return {
 		auto_prereqs   => [Bool => 1],
@@ -85,6 +98,12 @@ sub _generate_attribute {
 # main
 sub configure {
 	my ($self) = @_;
+
+	$self->log($_) for (
+		"!\n",
+		__PACKAGE__ . " is deprecated and will soon be removed.\n",
+		"!\n",
+	);
 
 	my $skip = $self->skip_plugins;
 	$skip &&= qr/$skip/;
@@ -148,7 +167,8 @@ sub _bundled_plugins {
 	return (
 	
 	# provide version
-		'Git::DescribeVersion',
+		#'Git::DescribeVersion',
+		'Git::NextVersion',
 
 	# gather and prune
 		qw(
@@ -159,8 +179,13 @@ sub _bundled_plugins {
 
 	# munge files
 		[ 'Authority' => { do_metadata => 1 }],
+		[
+			NextRelease => {
+				format => '%v %{yyyy-MM-dd}d'
+			}
+		],
 		'PkgVersion',
-		# 'Prepender' 1.100960
+		'Prepender',
 		( $self->is_task
 			?  'TaskWeaver'
 			: [ 'PodWeaver' => { config_plugin => $self->weaver_config } ]
@@ -171,12 +196,6 @@ sub _bundled_plugins {
 			License
 			Readme
 		),
-		[
-			GitFmtChanges => {
-				file_name  => 'Changes',
-				log_format => 'format:%h %s%n'
-			}
-		],
 		# @APOCALYPTIC: generate MANIFEST.SKIP ?
 
 	# metadata
@@ -238,6 +257,7 @@ sub _bundled_plugins {
 
 	# generated xt/ tests
 		qw(
+			CPANChangesTests
 			MetaTests
 			PodSyntaxTests
 			PodCoverageTests
@@ -257,6 +277,7 @@ sub _bundled_plugins {
 	# before release
 			#CheckExtraTests
 		qw(
+			CheckChangesHasContent
 			TestRelease
 			ConfirmRelease
 		),
@@ -297,7 +318,8 @@ __END__
 =pod
 
 =for :stopwords Randy Stauner PluginBundle PluginBundles DAGOLDEN RJBS dists ini arrayrefs
-CPAN AnnoCPAN RT CPANTS Kwalitee diff IRC
+cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc
+mailto metadata placeholders
 
 =head1 NAME
 
@@ -305,7 +327,12 @@ Dist::Zilla::PluginBundle::GopherRepellent - keep those pesky gophers out of you
 
 =head1 VERSION
 
-version 1.000007
+version 1.002
+
+=head1 DEPRECATED
+
+This module is deprecated.
+It will soon be renamed into the Author namespace.
 
 =head1 SYNOPSIS
 
@@ -400,7 +427,7 @@ and then you can add it yourself:
 
 This bundle is roughly equivalent to:
 
-	[Git::DescribeVersion]  ; count commits from last tag to provide version
+	[Git::NextVersion]      ; autoincrement version from last tag
 
 	; choose files to include (dzil core [@Basic])
 	[GatherDir]             ; everything under top dir
@@ -410,7 +437,10 @@ This bundle is roughly equivalent to:
 	; munge files
 	[Authority]             ; inject $AUTHORITY into modules
 	do_metadata = 1         ; default
+	[NextRelease]           ; simplify maintenance of Changes file
+	format = %v %{yyyy-MM-dd}d
 	[PkgVersion]            ; inject $VERSION into modules
+	[Prepender]             ; add header to source code files
 
 	[PodWeaver]             ; munge POD in all modules
 	config_plugin = @GopherRepellent
@@ -420,9 +450,6 @@ This bundle is roughly equivalent to:
 	; generate files
 	[License]               ; generate distribution files (dzil core [@Basic])
 	[Readme]
-	[GitFmtChanges]         ; generate a Changes file from git log --oneline
-	file_name = Changes
-	log_format = format:%h %s%n
 
 	; metadata
 	[Bugtracker]            ; include bugtracker URL and email address (uses RT)
@@ -466,6 +493,7 @@ This bundle is roughly equivalent to:
 	[ReportVersions::Tiny]  ; show module versions used in test reports
 
 	; generate xt/ tests
+	[CPANChangesTests]      ; Test::CPAN::Changes
 	[MetaTests]             ; test META
 	[PodSyntaxTests]        ; test POD
 	[PodCoverageTests]      ; test documentation coverage
@@ -478,6 +506,7 @@ This bundle is roughly equivalent to:
 	[Manifest]              ; build MANIFEST file (dzil core [@Basic])
 	
 	; actions for releasing the distribution (dzil core [@Basic])
+	[CheckChangesHasContent]
 	[TestRelease]           ; run tests before releasing
 	[ConfirmRelease]        ; are you sure?
 	[UploadToCPAN]
@@ -494,8 +523,7 @@ It also made sense to me to build a separate
 PluginBundle for C<$work> which could use this one
 and then set a few attributes.
 
-This bundle is essentially C<BeLike::RWSTAUNER>.
-(Who would want to do that?)
+This bundle is essentially (and may one day become) C<@Author::RWSTAUNER>.
 
 It is subject to change.
 
@@ -540,6 +568,8 @@ The Secret of Monkey Island (E<copy> Lucas Arts)
 =back
 
 =head1 SUPPORT
+
+=head2 Perldoc
 
 You can find documentation for this module with the perldoc command.
 
@@ -605,8 +635,8 @@ L<http://matrix.cpantesters.org/?dist=Dist-Zilla-PluginBundle-GopherRepellent>
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests by email to C<bug-dist-zilla-pluginbundle-gopherrepellent at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Dist-Zilla-PluginBundle-GopherRepellent>.  I will be
-notified, and then you'll automatically be notified of progress on your bug as I make changes.
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Dist-Zilla-PluginBundle-GopherRepellent>. You will be automatically notified of any
+progress on the request by the system.
 
 =head2 Source Code
 
